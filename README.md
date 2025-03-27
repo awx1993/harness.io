@@ -180,6 +180,45 @@ Verification → Checks pod health via Prometheus.
 
 Rollback → If errors occur, reverts to the last stable version.
 
+# Harness Pipeline YAML Example for Azure DevOps Integration
+Here's a complete YAML example for a Harness pipeline that deploys a Dockerized application to Azure Kubernetes Service (AKS) triggered by an Azure DevOps (ADO) pipeline.
+
+Pipeline Overview
+Trigger: Azure DevOps build completes → Webhook triggers Harness.
+
+Stages:
+
+Build (Optional, if using Harness CI)
+
+Deploy to AKS (Rolling Deployment)
+
+Features:
+
+Automatic rollback on failure
+
+Health checks using Azure Monitor
+
+Harness Pipeline YAML ----->harness.yaml
+
+# Trigger Configuration (Azure DevOps → Harness)
+Add this webhook trigger in Harness to listen to Azure DevOps events:
+
+# How to Use This Pipeline
+Replace Placeholders:
+
+azure_acr_connector → Your Azure Container Registry connector in Harness.
+
+aks_connector → Your AKS Kubernetes connector in Harness.
+
+azure_devops_repo → Your Azure Repos Git connector.
+
+Set Up the Webhook in Azure DevOps:
+
+In your ADO build pipeline, add a webhook notification to Harness:
+
+<img width="378" alt="image" src="https://github.com/user-attachments/assets/e17f3806-eed8-403f-b87f-4489a0378214" />
+
+
 
 
 
