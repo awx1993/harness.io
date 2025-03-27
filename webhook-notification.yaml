@@ -1,0 +1,6 @@
+# Example (Azure DevOps YAML)
+- task: PowerShell@2
+  inputs:
+    targetType: inline
+    script: |
+      Invoke-WebRequest -Uri "https://app.harness.io/gateway/pipeline/api/webhook/custom/..." -Method POST

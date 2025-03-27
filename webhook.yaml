@@ -1,0 +1,34 @@
+trigger:
+  name: azure-devops-trigger
+  identifier: azure_devops_trigger
+  enabled: true
+  orgIdentifier: default
+  projectIdentifier: my_project
+  pipelineIdentifier: azure_aks_deployment
+  source:
+    type: Webhook
+    spec:
+      type: Custom
+      spec:
+        payloadConditions: []
+        headerConditions:
+          - key: X-Azure-Event
+            operator: Equals
+            value: "build.complete"
+  inputYaml: |-
+    pipeline:
+      identifier: azure_aks_deployment
+      stages:
+        - stage:
+            identifier: Deploy_to_AKS
+            type: Deployment
+            spec:
+              serviceConfig:
+                serviceDefinition:
+                  spec:
+                    artifacts:
+                      primary:
+                        primaryArtifactRef: <+trigger.artifact>
+                        sources:
+                          - spec:
+                              tag: <+trigger.tag>

@@ -1,0 +1,61 @@
+pipeline:
+  name: azure_webapp_deployment
+  identifier: azure_webapp_deployment
+  projectIdentifier: my_project
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Deploy to Azure Web App
+        identifier: Deploy_to_Azure_Web_App
+        type: Deployment
+        spec:
+          serviceConfig:
+            serviceRef: my_webapp_service
+            serviceDefinition:
+              type: AzureWebApp
+              spec:
+                artifacts:
+                  primary:
+                    primaryArtifactRef: <+input>
+                    sources:
+                      - spec:
+                          connectorRef: azure_devops_artifacts  # Connector to Azure Artifacts/Blob
+                          packageType: zip
+                          project: my-ado-project
+                          feed: my-feed
+                          package: my-webapp
+                          version: <+input>
+                        identifier: primary
+                        type: AzureArtifacts
+          infrastructure:
+            environmentRef: azure_webapp_env
+            infrastructureDefinition:
+              type: AzureWebApp
+              spec:
+                connectorRef: azure_connector  # Azure Cloud Connector
+                subscriptionId: "12345-abcde-67890"
+                resourceGroup: "my-resource-group"
+                appName: "my-webapp"
+                deploymentSlot: "production"
+                targetSlot: "staging"  # For slot-swap deployments
+          execution:
+            steps:
+              - step:
+                  type: AzureWebAppRollingDeploy
+                  name: Deploy Web App
+                  identifier: deployWebApp
+                  spec:
+                    skipDryRun: false
+            rollbackSteps:
+              - step:
+                  type: AzureWebAppRollingRollback
+                  name: Rollback Web App
+                  identifier: rollbackWebApp
+                  spec: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback

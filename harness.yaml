@@ -1,0 +1,81 @@
+pipeline:
+  name: azure-aks-deployment
+  identifier: azure_aks_deployment
+  projectIdentifier: my_project
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Deploy to AKS
+        identifier: Deploy_to_AKS
+        description: "Deploy Docker image from ACR to AKS"
+        type: Deployment
+        spec:
+          serviceConfig:
+            serviceRef: my_azure_service
+            serviceDefinition:
+              type: Kubernetes
+              spec:
+                artifacts:
+                  primary:
+                    primaryArtifactRef: <+input>
+                    sources:
+                      - spec:
+                          connectorRef: azure_acr_connector  # Connector to Azure Container Registry
+                          imagePath: myacr.azurecr.io/myapp
+                          tag: <+input>
+                        identifier: primary
+                        type: DockerRegistry
+                manifests:
+                  - manifest:
+                      identifier: k8s_manifest
+                      type: K8sManifest
+                      spec:
+                        store:
+                          type: Http
+                          spec:
+                            connectorRef: azure_devops_repo  # Connector to Azure Repos
+                            gitFetchType: Branch
+                            branch: main
+                            paths:
+                              - /manifests/deployment.yaml  # Path to K8s YAML in Azure Repos
+          infrastructure:
+            environmentRef: aks_production
+            infrastructureDefinition:
+              type: KubernetesDirect
+              spec:
+                connectorRef: aks_connector  # Connector to AKS
+                namespace: default
+                releaseName: release-<+pipeline.sequenceId>
+          execution:
+            steps:
+              - step:
+                  type: K8sRollingDeploy
+                  name: Rollout Deployment
+                  identifier: rolloutDeployment
+                  spec:
+                    skipDryRun: false
+                    pruningEnabled: false
+              - step:
+                  type: K8sDelete
+                  name: Delete Old Replicas
+                  identifier: deleteOldReplicas
+                  spec:
+                    deleteResources:
+                      type: ReleaseName
+                      spec:
+                        deleteNamespace: false
+            rollbackSteps:
+              - step:
+                  type: K8sRollingRollback
+                  name: Rollback
+                  identifier: rollback
+                  spec:
+                    pruningEnabled: false
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
