@@ -1,4 +1,4 @@
-# harness.io
+# Harness.io
 DevSecOps demo
 # Key Features of Harness.io
 Continuous Delivery (CD) – Automates deployments with built-in verification, rollback, and GitOps support.
@@ -54,3 +54,134 @@ Set Up a Harness Service → Point to your Docker image (e.g., myapp:latest).
 Configure Infrastructure → Connect to your K8s cluster (EKS, GKE, AKS).
 
 Run Pipeline → Harness deploys, verifies, and rolls back if needed.
+
+# ✅ Benefits of Using Harness in CI/CD
+✔ Faster Deployments – Automates manual steps.
+✔ Fewer Failures – Auto-rollback if something breaks.
+✔ Cost Savings – Optimizes cloud resource usage.
+✔ Security – Built-in security scans.
+
+# Step-by-Step Guide: Implementing Harness.io with Azure DevOps Pipelines
+This guide explains how to integrate Harness CD with Azure DevOps for automated deployments, approvals, and rollback strategies.
+# Prerequisites
+Azure DevOps Account (with a repository containing your app code).
+
+Harness.io Account (Sign up here).
+
+Docker/Kubernetes/VM Target (where your app will deploy).
+
+Azure Service Principal (for Azure Cloud deployments) (optional).
+
+# Step 1: Install Harness Delegate (Agent)
+Harness uses a Delegate (lightweight worker) to execute deployments in your environment.
+
+1.1. Set Up a Delegate
+Log in to Harness → Project Setup → Delegates.
+
+Click + New Delegate → Docker/Kubernetes/Shell Script.
+
+Run the provided command in your Azure VM, AKS, or local machine:
+# Example (Kubernetes)
+kubectl apply -f harness-delegate.yaml
+
+Verify the Delegate is connected (Status = Active).
+
+# Step 2: Connect Azure DevOps to Harness
+2.1. Add Azure DevOps as a Code Repository
+In Harness, go to Project Settings → Connectors.
+
+Click + New Connector → Azure Repos.
+
+Enter:
+
+Azure DevOps Organization URL (https://dev.azure.com/{org})
+
+Personal Access Token (PAT) (from Azure DevOps)
+
+Test & Save.
+
+# Step 3: Create a Harness Pipeline for Azure DevOps
+3.1. Define a New Pipeline
+Go to Pipelines → + New Pipeline.
+
+Name it (e.g., azure-devops-to-aks).
+
+Select Deployment Type (Kubernetes, Azure Web App, VM, etc.).
+
+3.2. Configure Pipeline Stages
+A. Build Stage (Optional - if not using Azure DevOps CI)
+If using Azure DevOps Build Pipelines, skip this.
+
+If using Harness CI, define:
+
+Build Infrastructure (Harness Cloud or Self-Hosted).
+
+Build Steps (e.g., docker build, mvn package).
+
+B. Deploy Stage
+Add a Deployment Stage → Choose Kubernetes/Azure Web App/VM.
+
+Define Service:
+
+Name: my-azure-app
+
+Artifact Source: Azure Container Registry (ACR) or Docker Hub.
+
+Define Infrastructure:
+
+Cluster Details (AKS, EKS, etc.).
+
+Namespace (default or custom).
+
+Define Execution Steps:
+
+Rolling Deployment (default for Kubernetes).
+
+Canary Deployment (gradual traffic shift).
+
+Blue-Green (zero-downtime switch).
+
+# Step 4: Trigger Harness from Azure DevOps
+4.1. Option 1: Webhook Trigger (Recommended)
+In Azure DevOps Pipelines, add a Webhook after the build.
+
+In Harness, go to Triggers → + New Trigger → Webhook.
+
+Copy the Harness Webhook URL.
+
+In Azure DevOps, add a POST request to the Harness Webhook after a successful build.
+
+4.2. Option 2: Harness API Call
+Use Azure DevOps Pipeline Task (curl or PowerShell) to call Harness API:
+curl -X POST "https://app.harness.io/gateway/pipeline/api/webhook/custom/..." -H "Content-Type: application/json"
+
+# Step 5: Add Verification & Rollback
+5.1. Automated Health Checks
+Integrate with Azure Monitor, Prometheus, or Datadog.
+
+If metrics fail → Auto-Rollback.
+
+5.2. Manual Approvals
+Add an Approval Step before production deployment.
+
+# Step 6: Run & Monitor
+Trigger a Build in Azure DevOps → Harness picks up the artifact.
+
+Check Harness Deployments → Logs, success/failure status.
+
+Rollback Automatically if health checks fail.
+
+** Example: Deploying to AKS **
+Azure DevOps Build → Pushes Docker image to ACR.
+
+Harness Pipeline → Pulls image, deploys to AKS.
+
+Verification → Checks pod health via Prometheus.
+
+Rollback → If errors occur, reverts to the last stable version.
+
+
+
+
+
+
