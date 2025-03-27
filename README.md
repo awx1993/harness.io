@@ -218,6 +218,67 @@ In your ADO build pipeline, add a webhook notification to Harness:
 
 <img width="378" alt="image" src="https://github.com/user-attachments/assets/e17f3806-eed8-403f-b87f-4489a0378214" />
 
+Run the Pipeline:
+
+Push a change to Azure Repos → ADO build runs → Harness deploys to AKS.
+
+** Key Features in This Example **
+✔ Kubernetes Rolling Deployment (Zero-downtime updates)
+✔ Automatic Rollback (If health checks fail)
+✔ Artifact from Azure Container Registry (ACR)
+✔ Manifests stored in Azure Repos Git
+✔ Webhook Trigger from Azure DevOps
+
+>> Here's a step-by-step guide with YAML examples to deploy an Azure Web App using Harness.io triggered by an Azure DevOps (ADO) Pipeline. <<
+
+Solution Overview
+Azure DevOps Build Pipeline → Builds & publishes artifact (ZIP/JAR).
+
+Harness Pipeline → Deploys artifact to Azure Web App.
+
+Trigger → ADO pipeline completes → Harness deploys via Webhook.
+
+Step 1: Set Up Harness for Azure Web App
+1.1. Install Harness Delegate
+Follow Harness Delegate Setup (Docker/K8s/Shell).
+
+1.2. Configure Azure Connectors in Harness
+Azure Cloud Provider Connector
+
+Harness → Connectors → Cloud Providers → + Azure
+
+Use Service Principal Authentication (from Azure AD).
+
+Required permissions:
+
+Contributor on the Web App.
+
+Azure Artifacts Connector (Optional)
+
+If pulling artifacts from Azure Artifacts Feed, set up a Docker/Generic connector.
+
+Harness Pipeline YAML (Azure Web App)  ----> azure-web-app.yaml
+
+Step 2: Configure Azure DevOps Pipeline (CI)
+2.1. ADO Pipeline YAML (Build + Publish Artifact)   ----> ado-pipeline.yaml
+
+Step 3: Set Up Webhook Trigger in Harness   ------> webapp-trigger.yaml
+
+#Key Features
+✔ Zero-Downtime Deployments (Slot-swapping supported).
+✔ Auto-Rollback if deployment fails.
+✔ Azure Artifacts Integration (ZIP, JAR, etc.).
+✔ Webhook Trigger from Azure DevOps.
+
+Next Steps
+Test the Pipeline:
+
+Push a change to Azure Repos → ADO builds → Harness deploys.
+
+Monitor Deployments:
+
+Check Harness Deployments tab for logs.
+
 
 
 
